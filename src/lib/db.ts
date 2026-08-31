@@ -4,7 +4,9 @@ function getConnectionString(): string {
   const url =
     process.env.DATABASE_URL ||
     process.env.POSTGRES_URL ||
-    process.env.POSTGRES_PRISMA_URL;
+    process.env.POSTGRES_PRISMA_URL ||
+    process.env.astayodha_POSTGRES_URL ||
+    process.env.astayodha_DATABASE_URL_UNPOOLED;
   if (!url) {
     throw new Error(
       "Database belum terhubung. Tambahkan Postgres (mis. Neon) lewat tab Storage di dashboard Vercel, lalu deploy ulang."
