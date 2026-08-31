@@ -54,6 +54,17 @@ export async function ensureSchema(): Promise<void> {
           created_at TIMESTAMPTZ NOT NULL DEFAULT now()
         )
       `;
+      await sql`
+        CREATE TABLE IF NOT EXISTS berita (
+          id SERIAL PRIMARY KEY,
+          judul TEXT NOT NULL,
+          ringkasan TEXT NOT NULL DEFAULT '',
+          isi TEXT NOT NULL DEFAULT '',
+          foto_url TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+      `;
     })();
   }
   return schemaReady;

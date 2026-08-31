@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { kategoriList, type Surat, type Anggota, type KategoriSurat } from "@/lib/data";
+import BeritaAdmin from "@/components/BeritaAdmin";
 
-type Tab = "arsip" | "anggota";
+type Tab = "arsip" | "anggota" | "berita";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -43,6 +44,14 @@ export default function AdminDashboardPage() {
               Pengurus
             </button>
             <button
+              onClick={() => setTab("berita")}
+              className={`flex-1 rounded px-3 py-2.5 text-left text-sm md:flex-none ${
+                tab === "berita" ? "bg-ink font-semibold text-cream" : "text-ink/60 hover:bg-ink/5"
+              }`}
+            >
+              Berita
+            </button>
+            <button
               onClick={() => setTab("arsip")}
               className={`flex-1 rounded px-3 py-2.5 text-left text-sm md:flex-none ${
                 tab === "arsip" ? "bg-ink font-semibold text-cream" : "text-ink/60 hover:bg-ink/5"
@@ -54,7 +63,7 @@ export default function AdminDashboardPage() {
         </aside>
 
         <main className="flex-1 p-6 md:p-10">
-          {tab === "arsip" ? <ArsipTab /> : <AnggotaTab />}
+          {tab === "arsip" ? <ArsipTab /> : tab === "anggota" ? <AnggotaTab /> : <BeritaAdmin />}
         </main>
       </div>
     </div>

@@ -35,6 +35,9 @@ export default function Footer() {
               <Link href="/pengurus" className="hover:text-redd">Susunan Pengurus</Link>
             </li>
             <li>
+              <Link href="/berita" className="hover:text-redd">Berita Kegiatan</Link>
+            </li>
+            <li>
               <Link href="/arsip-surat" className="hover:text-redd">Arsip Surat</Link>
             </li>
           </ul>

@@ -35,3 +35,13 @@ export type Anggota = {
   urutan: number;
   created_at: string;
 };
+
+export type Berita = {
+  id: number;
+  judul: string;
+  ringkasan: string;
+  isi: string;
+  foto_url: string | null;
+  created_at: string;
+  updated_at: string;
+};

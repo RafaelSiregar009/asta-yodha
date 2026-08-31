@@ -8,6 +8,7 @@ const links = [
   { href: "/", label: "Beranda" },
   { href: "/profil", label: "Profil" },
   { href: "/pengurus", label: "Pengurus" },
+  { href: "/berita", label: "Berita" },
   { href: "/arsip-surat", label: "Arsip Surat" },
   { href: "/kontak", label: "Kontak" },
 ];
