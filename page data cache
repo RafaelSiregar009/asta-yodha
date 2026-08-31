@@ -1,0 +1,94 @@
+warning: in the working copy of 'src/app/pengurus/page.tsx', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/src/app/pengurus/page.tsx b/src/app/pengurus/page.tsx[m
+[1mindex 2260a74..ffa1a95 100644[m
+[1m--- a/src/app/pengurus/page.tsx[m
+[1m+++ b/src/app/pengurus/page.tsx[m
+[36m@@ -1,4 +1,5 @@[m
+ import type { Metadata } from "next";[m
+[32m+[m[32mimport { unstable_noStore as noStore } from "next/cache";[m
+ import { db, ensureSchema } from "@/lib/db";[m
+ import type { Anggota } from "@/lib/data";[m
+ [m
+[36m@@ -7,19 +8,32 @@[m [mexport const metadata: Metadata = {[m
+ };[m
+ [m
+ export const dynamic = "force-dynamic";[m
+[32m+[m[32mexport const revalidate = 0;[m
+[32m+[m[32mexport const fetchCache = "force-no-store";[m
+ [m
+ async function getAnggota(): Promise<{ data: Anggota[]; error: string | null }> {[m
+[32m+[m[32m  // Memastikan hasil query Neon tidak disimpan sebagai cache halaman.[m
+[32m+[m[32m  noStore();[m
+[32m+[m
+   try {[m
+     await ensureSchema();[m
+     const sql = db();[m
+[32m+[m
+     const rows = await sql`[m
+       SELECT id, nama, jabatan, foto_url, keterangan, urutan, created_at[m
+       FROM anggota[m
+       ORDER BY urutan ASC, created_at ASC[m
+     `;[m
+[31m-    return { data: rows as unknown as Anggota[], error: null };[m
+[32m+[m
+[32m+[m[32m    return {[m
+[32m+[m[32m      data: rows as unknown as Anggota[],[m
+[32m+[m[32m      error: null,[m
+[32m+[m[32m    };[m
+   } catch (err) {[m
+[31m-    return { data: [], error: err instanceof Error ? err.message : "Gagal memuat data." };[m
+[32m+[m[32m    return {[m
+[32m+[m[32m      data: [],[m
+[32m+[m[32m      error: err instanceof Error ? err.message : "Gagal memuat data pengurus.",[m
+[32m+[m[32m    };[m
+   }[m
+ }[m
+ [m
+[36m@@ -28,7 +42,7 @@[m [mfunction initials(name: string): string {[m
+     .split(" ")[m
+     .filter(Boolean)[m
+     .slice(0, 2)[m
+[31m-    .map((w) => w[0]?.toUpperCase())[m
+[32m+[m[32m    .map((word) => word[0]?.toUpperCase())[m
+     .join("");[m
+ }[m
+ [m
+[36m@@ -70,10 +84,13 @@[m [mexport default async function PengurusPage() {[m
+         </div>[m
+       )}[m
+ [m
+[31m-      {pengurus.length > 0 && ([m
+[32m+[m[32m      {!error && pengurus.length > 0 && ([m
+         <div className="container-page mt-14 grid grid-cols-2 gap-px bg-ink/10 md:grid-cols-4">[m
+           {pengurus.map((person) => ([m
+[31m-            <div key={person.id} className="group relative aspect-[3/4] overflow-hidden bg-ink">[m
+[32m+[m[32m            <article[m
+[32m+[m[32m              key={person.id}[m
+[32m+[m[32m              className="group relative aspect-[3/4] overflow-hidden bg-ink"[m
+[32m+[m[32m            >[m
+               {person.foto_url ? ([m
+                 // eslint-disable-next-line @next/next/no-img-element[m
+                 <img[m
+[36m@@ -86,14 +103,19 @@[m [mexport default async function PengurusPage() {[m
+                   {initials(person.nama)}[m
+                 </div>[m
+               )}[m
+[32m+[m
+               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink via-ink/70 to-transparent p-4 pt-10">[m
+                 <p className="font-semibold text-cream">{person.nama}</p>[m
+                 <p className="text-sm text-cream/60">{person.jabatan}</p>[m
+[32m+[m
+[32m+[m[32m                {person.keterangan && ([m
+[32m+[m[32m                  <p className="mt-1 text-xs text-cream/50">{person.keterangan}</p>[m
+[32m+[m[32m                )}[m
+               </div>[m
+[31m-            </div>[m
+[32m+[m[32m            </article>[m
+           ))}[m
+         </div>[m
+       )}[m
+     </div>[m
+   );[m
+[31m-}[m
+[32m+[m[32m}[m
+\ No newline at end of file[m

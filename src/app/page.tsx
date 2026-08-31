@@ -22,7 +22,7 @@ export default function BerandaPage() {
         <div className="container-page relative flex min-h-[85vh] flex-col justify-center py-24">
           <div className="mb-6 flex items-center gap-3 text-cream/70">
             <span className="h-px w-10 bg-redd" aria-hidden="true" />
-            <span className="eyebrow">Wadah Pemuda Kelurahan Sukamaju</span>
+            <span className="eyebrow">Wadah Pemuda Perumahan Mustika Blok F RT 06 RW 009 Desa Matagara Kecamatan Tigaraksa</span>
           </div>
 
           <h1 className="display-tight font-display text-[15vw] leading-[0.86] sm:text-[10vw] lg:text-[7.2vw]">
