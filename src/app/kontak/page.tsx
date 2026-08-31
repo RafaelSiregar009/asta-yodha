@@ -8,13 +8,13 @@ const kontak = [
   {
     icon: "📍",
     label: "Alamat",
-    value: "Jl. Pemuda Raya No. 12, Kel. Sukamaju, Kec. Cempaka",
+    value: "JPerumahan Mustika Blok F RT 06 RW 09 Desa Matagara Kecamatan Tigaraksa Kabupaten Tangerang Provinsi Banten",
   },
   {
     icon: "✉",
     label: "Email",
-    value: "karangtaruna.astayodha@gmail.com",
-    href: "mailto:karangtaruna.astayodha@gmail.com",
+    value: "astayodhaa@gmail.com",
+    href: "astayodha@gmail.com",
   },
   {
     icon: "📞",

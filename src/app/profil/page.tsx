@@ -13,7 +13,7 @@ const sections = [
       <>
         <p>
           Karang Taruna Asta Yodha adalah wadah pengembangan generasi muda
-          yang berdiri sejak 2015 di Kelurahan Sukamaju. Kami lahir dari
+          yang berdiri sejak 2023 di Perumahan Mustika Blok F RT 06 RW 09 Desa Matagara Kecamatan Tigaraksa. Kami lahir dari
           semangat gotong royong pemuda kampung yang ingin berkontribusi
           nyata bagi lingkungannya.
         </p>
