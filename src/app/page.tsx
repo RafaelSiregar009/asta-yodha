@@ -97,7 +97,7 @@ export default function BerandaPage() {
 }
 
 const stats = [
-  { value: "2015", label: "Tahun berdiri di Kelurahan Sukamaju" },
+  { value: "2015", label: "Tahun berdiri di Perumahan Mustika Blok F RT 06 RW 09 Desa Matagara Kecamatan Tigaraksa" },
   { value: "80+", label: "Anggota aktif dari 4 RW" },
   { value: "4", label: "Jenis layanan surat untuk warga" },
 ];
