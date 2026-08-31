@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { unstable_noStore as noStore } from "next/cache";
 import { db, ensureSchema } from "@/lib/db";
 import type { Anggota } from "@/lib/data";
 
@@ -7,19 +8,32 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 async function getAnggota(): Promise<{ data: Anggota[]; error: string | null }> {
+  // Memastikan hasil query Neon tidak disimpan sebagai cache halaman.
+  noStore();
+
   try {
     await ensureSchema();
     const sql = db();
+
     const rows = await sql`
       SELECT id, nama, jabatan, foto_url, keterangan, urutan, created_at
       FROM anggota
       ORDER BY urutan ASC, created_at ASC
     `;
-    return { data: rows as unknown as Anggota[], error: null };
+
+    return {
+      data: rows as unknown as Anggota[],
+      error: null,
+    };
   } catch (err) {
-    return { data: [], error: err instanceof Error ? err.message : "Gagal memuat data." };
+    return {
+      data: [],
+      error: err instanceof Error ? err.message : "Gagal memuat data pengurus.",
+    };
   }
 }
 
@@ -28,7 +42,7 @@ function initials(name: string): string {
     .split(" ")
     .filter(Boolean)
     .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
+    .map((word) => word[0]?.toUpperCase())
     .join("");
 }
 
@@ -70,10 +84,13 @@ export default async function PengurusPage() {
         </div>
       )}
 
-      {pengurus.length > 0 && (
+      {!error && pengurus.length > 0 && (
         <div className="container-page mt-14 grid grid-cols-2 gap-px bg-ink/10 md:grid-cols-4">
           {pengurus.map((person) => (
-            <div key={person.id} className="group relative aspect-[3/4] overflow-hidden bg-ink">
+            <article
+              key={person.id}
+              className="group relative aspect-[3/4] overflow-hidden bg-ink"
+            >
               {person.foto_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -86,11 +103,16 @@ export default async function PengurusPage() {
                   {initials(person.nama)}
                 </div>
               )}
+
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink via-ink/70 to-transparent p-4 pt-10">
                 <p className="font-semibold text-cream">{person.nama}</p>
                 <p className="text-sm text-cream/60">{person.jabatan}</p>
+
+                {person.keterangan && (
+                  <p className="mt-1 text-xs text-cream/50">{person.keterangan}</p>
+                )}
               </div>
-            </div>
+            </article>
           ))}
         </div>
       )}
