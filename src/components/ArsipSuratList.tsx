@@ -64,6 +64,8 @@ export default function ArsipSuratList() {
           prev.map((s) => (s.id === surat.id ? { ...s, diunduh: json.diunduh } : s))
         );
         window.open(json.url, "_blank", "noopener,noreferrer");
+      } else {
+        window.open(surat.file_url, "_blank", "noopener,noreferrer");
       }
     } catch {
       // Kalau gagal mencatat unduhan, tetap izinkan buka file langsung.

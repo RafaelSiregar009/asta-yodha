@@ -31,14 +31,18 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     let fileUrl: string | undefined;
     let fileName: string | undefined;
     let ukuranKb: number | undefined;
+    let fileLama: string | null = null;
 
     if (file instanceof File && file.size > 0) {
       const existing = await sql`SELECT file_url FROM arsip_surat WHERE id = ${id}`;
+      if (existing.length === 0) {
+        return NextResponse.json({ error: "Data tidak ditemukan." }, { status: 404 });
+      }
+      fileLama = (existing[0].file_url as string | null) ?? null;
       const uploaded = await uploadFile(file, "arsip-surat");
       fileUrl = uploaded.url;
       fileName = uploaded.name;
       ukuranKb = uploaded.sizeKb;
-      if (existing[0]?.file_url) await deleteFile(existing[0].file_url as string);
     }
 
     const rows = fileUrl
@@ -59,6 +63,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     if (rows.length === 0) {
       return NextResponse.json({ error: "Data tidak ditemukan." }, { status: 404 });
     }
+    // Hapus file lama hanya setelah database berhasil diperbarui.
+    if (fileUrl && fileLama) await deleteFile(fileLama);
 
     return NextResponse.json({ data: rows[0] });
   } catch (err) {

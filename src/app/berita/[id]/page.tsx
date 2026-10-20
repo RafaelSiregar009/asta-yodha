@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 async function getBerita(id: number): Promise<Berita | null> {
   noStore();
+  if (!Number.isInteger(id) || id <= 0) return null;
   await ensureSchema();
   const sql = db();
   const rows = await sql`SELECT id, judul, ringkasan, isi, foto_url, created_at, updated_at FROM berita WHERE id = ${id}`;

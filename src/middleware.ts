@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
 
-const PROTECTED_API_PREFIXES = ["/api/arsip", "/api/anggota"];
+const PROTECTED_API_PREFIXES = ["/api/arsip", "/api/anggota", "/api/berita", "/api/debug-db"];
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isApi = PROTECTED_API_PREFIXES.some((p) => pathname.startsWith(p));
 
-  // Data publik (GET) tetap terbuka untuk halaman Arsip Surat & Pengurus.
-  if (isApi && SAFE_METHODS.has(req.method)) {
+  // Data publik (GET) tetap terbuka untuk halaman Arsip Surat, Pengurus & Berita.
+  // Endpoint debug selalu butuh login.
+  if (isApi && SAFE_METHODS.has(req.method) && !pathname.startsWith("/api/debug-db")) {
     return NextResponse.next();
   }
   // Endpoint unduh (POST) untuk warga tetap terbuka.
@@ -34,5 +35,11 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/dashboard/:path*", "/api/arsip/:path*", "/api/anggota/:path*"],
+  matcher: [
+    "/admin/dashboard/:path*",
+    "/api/arsip/:path*",
+    "/api/anggota/:path*",
+    "/api/berita/:path*",
+    "/api/debug-db",
+  ],
 };

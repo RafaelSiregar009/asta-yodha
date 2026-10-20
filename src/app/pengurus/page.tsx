@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { unstable_noStore as noStore } from "next/cache";
 import { db, ensureSchema } from "@/lib/db";
 import type { Anggota } from "@/lib/data";
 
@@ -8,8 +9,12 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 async function getAnggota(): Promise<{ data: Anggota[]; error: string | null }> {
+  // Memastikan hasil query Neon tidak disimpan sebagai cache halaman.
+  noStore();
+
   try {
     await ensureSchema();
     const sql = db();
@@ -20,7 +25,7 @@ async function getAnggota(): Promise<{ data: Anggota[]; error: string | null }> 
     `;
     return { data: rows as unknown as Anggota[], error: null };
   } catch (err) {
-    return { data: [], error: err instanceof Error ? err.message : "Gagal memuat data." };
+    return { data: [], error: err instanceof Error ? err.message : "Gagal memuat data pengurus." };
   }
 }
 

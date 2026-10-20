@@ -54,15 +54,28 @@ export async function ensureSchema(): Promise<void> {
           foto_url TEXT,
           keterangan TEXT NOT NULL DEFAULT '',
           urutan INTEGER NOT NULL DEFAULT 0,
+          tingkat INTEGER NOT NULL DEFAULT 1,
           created_at TIMESTAMPTZ NOT NULL DEFAULT now()
         )
       `;
-      // Kolom tingkat = posisi di bagan pohon (1 = paling atas)
+      // Database lama dibuat sebelum kolom `tingkat` ada.
+      await sql`ALTER TABLE anggota ADD COLUMN IF NOT EXISTS tingkat INTEGER NOT NULL DEFAULT 1`;
       await sql`
-        ALTER TABLE anggota
-        ADD COLUMN IF NOT EXISTS tingkat INTEGER NOT NULL DEFAULT 1
+        CREATE TABLE IF NOT EXISTS berita (
+          id SERIAL PRIMARY KEY,
+          judul TEXT NOT NULL,
+          ringkasan TEXT NOT NULL DEFAULT '',
+          isi TEXT NOT NULL DEFAULT '',
+          foto_url TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
       `;
-    })();
+    })().catch((err) => {
+      // Jangan cache kegagalan — request berikutnya boleh mencoba lagi.
+      schemaReady = null;
+      throw err;
+    });
   }
   return schemaReady;
 }

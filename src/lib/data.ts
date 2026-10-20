@@ -44,3 +44,13 @@ export const tingkatOptions: { value: number; label: string }[] = [
   { value: 4, label: "Tingkat 4 — Seksi / Bidang" },
   { value: 5, label: "Tingkat 5 — Anggota" },
 ];
+
+export type Berita = {
+  id: number;
+  judul: string;
+  ringkasan: string;
+  isi: string;
+  foto_url: string | null;
+  created_at: string;
+  updated_at: string;
+};

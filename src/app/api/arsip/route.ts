@@ -5,12 +5,12 @@ import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-async function nextNomor(): Promise<string> {
-  const sql = db();
-  const rows = await sql`SELECT COUNT(*)::int AS count FROM arsip_surat`;
-  const count = (rows[0]?.count as number) ?? 0;
-  const year = new Date().getFullYear();
-  return `${String(count + 1).padStart(3, "0")}/KT-AY/I/${year}`;
+const BULAN_ROMAWI = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+
+/** Bagian belakang nomor surat, mis. "/KT-AY/X/2026". */
+function nomorSuffix(): string {
+  const now = new Date();
+  return `/KT-AY/${BULAN_ROMAWI[now.getMonth()]}/${now.getFullYear()}`;
 }
 
 export async function GET() {
@@ -60,11 +60,15 @@ export async function POST(req: Request) {
       ukuranKb = uploaded.sizeKb;
     }
 
-    const nomor = await nextNomor();
+    // Nomor surat diambil dari sequence id, jadi selalu unik walau ada surat
+    // yang dihapus atau dua admin mengunggah bersamaan.
     const sql = db();
     const rows = await sql`
-      INSERT INTO arsip_surat (nomor, judul, kategori, deskripsi, file_url, file_name, ukuran_kb)
-      VALUES (${nomor}, ${judul}, ${kategori}, ${deskripsi}, ${fileUrl}, ${fileName}, ${ukuranKb})
+      WITH n AS (SELECT nextval(pg_get_serial_sequence('arsip_surat', 'id')) AS id)
+      INSERT INTO arsip_surat (id, nomor, judul, kategori, deskripsi, file_url, file_name, ukuran_kb)
+      SELECT n.id, lpad(n.id::text, 3, '0') || ${nomorSuffix()}, ${judul}, ${kategori},
+             ${deskripsi}, ${fileUrl}, ${fileName}, ${ukuranKb}
+      FROM n
       RETURNING id, nomor, judul, kategori, deskripsi, file_url, file_name, ukuran_kb, diunduh, created_at
     `;
     return NextResponse.json({ data: rows[0] }, { status: 201 });

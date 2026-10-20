@@ -36,12 +36,15 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
     const sql = db();
     let fotoUrl: string | undefined;
+    let fotoLama: string | null = null;
 
     if (foto instanceof File && foto.size > 0) {
       const existing = await sql`SELECT foto_url FROM anggota WHERE id = ${id}`;
-      const uploaded = await uploadFile(foto, "anggota");
-      fotoUrl = uploaded.url;
-      if (existing[0]?.foto_url) await deleteFile(existing[0].foto_url as string);
+      if (existing.length === 0) {
+        return NextResponse.json({ error: "Data tidak ditemukan." }, { status: 404 });
+      }
+      fotoLama = (existing[0].foto_url as string | null) ?? null;
+      fotoUrl = (await uploadFile(foto, "anggota")).url;
     }
 
     const rows = fotoUrl
@@ -63,6 +66,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     if (rows.length === 0) {
       return NextResponse.json({ error: "Data tidak ditemukan." }, { status: 404 });
     }
+    // Hapus foto lama hanya setelah database berhasil diperbarui.
+    if (fotoUrl && fotoLama) await deleteFile(fotoLama);
 
     return NextResponse.json({ data: rows[0] });
   } catch (err) {

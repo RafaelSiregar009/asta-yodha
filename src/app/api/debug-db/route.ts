@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db, ensureSchema } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +10,11 @@ function mask(url: string | undefined): string {
   return match ? `...@${match[1]}/${match[2]}` : "(format tidak dikenali)";
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  if (!(await requireAdmin(req))) {
+    return NextResponse.json({ error: "Tidak diizinkan." }, { status: 401 });
+  }
+
   const sources = {
     DATABASE_URL: process.env.DATABASE_URL,
     POSTGRES_URL: process.env.POSTGRES_URL,
