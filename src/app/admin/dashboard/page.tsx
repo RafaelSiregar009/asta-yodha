@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { kategoriList, type Surat, type Anggota, type KategoriSurat } from "@/lib/data";
-import BeritaAdmin from "@/components/BeritaAdmin";
+import { kategoriList, tingkatOptions, type Surat, type Anggota, type KategoriSurat } from "@/lib/data";
 
-type Tab = "arsip" | "anggota" | "berita";
+type Tab = "arsip" | "anggota";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -44,14 +43,6 @@ export default function AdminDashboardPage() {
               Pengurus
             </button>
             <button
-              onClick={() => setTab("berita")}
-              className={`flex-1 rounded px-3 py-2.5 text-left text-sm md:flex-none ${
-                tab === "berita" ? "bg-ink font-semibold text-cream" : "text-ink/60 hover:bg-ink/5"
-              }`}
-            >
-              Berita
-            </button>
-            <button
               onClick={() => setTab("arsip")}
               className={`flex-1 rounded px-3 py-2.5 text-left text-sm md:flex-none ${
                 tab === "arsip" ? "bg-ink font-semibold text-cream" : "text-ink/60 hover:bg-ink/5"
@@ -63,7 +54,7 @@ export default function AdminDashboardPage() {
         </aside>
 
         <main className="flex-1 p-6 md:p-10">
-          {tab === "arsip" ? <ArsipTab /> : tab === "anggota" ? <AnggotaTab /> : <BeritaAdmin />}
+          {tab === "arsip" ? <ArsipTab /> : <AnggotaTab />}
         </main>
       </div>
     </div>
@@ -442,6 +433,7 @@ function AnggotaTab() {
               <th className="px-5 py-3 font-medium">Foto</th>
               <th className="px-5 py-3 font-medium">Nama</th>
               <th className="px-5 py-3 font-medium">Jabatan</th>
+              <th className="px-5 py-3 font-medium">Tingkat</th>
               <th className="px-5 py-3 font-medium">Urutan</th>
               <th className="px-5 py-3 text-right font-medium">Aksi</th>
             </tr>
@@ -449,7 +441,7 @@ function AnggotaTab() {
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={5} className="px-5 py-10 text-center text-ink/40">
+                <td colSpan={6} className="px-5 py-10 text-center text-ink/40">
                   Memuat…
                 </td>
               </tr>
@@ -473,6 +465,7 @@ function AnggotaTab() {
                   </td>
                   <td className="px-5 py-4 font-semibold">{a.nama}</td>
                   <td className="px-5 py-4 text-ink/70">{a.jabatan}</td>
+                  <td className="px-5 py-4 text-ink/70">{a.tingkat}</td>
                   <td className="px-5 py-4 text-ink/70">{a.urutan}</td>
                   <td className="px-5 py-4">
                     <div className="flex justify-end gap-2">
@@ -495,7 +488,7 @@ function AnggotaTab() {
               ))}
             {!loading && items.length === 0 && !error && (
               <tr>
-                <td colSpan={5} className="px-5 py-10 text-center text-ink/40">
+                <td colSpan={6} className="px-5 py-10 text-center text-ink/40">
                   Belum ada anggota. Klik &ldquo;Tambah Anggota&rdquo; untuk menambahkan.
                 </td>
               </tr>
@@ -534,6 +527,7 @@ function AnggotaModal({
   const [jabatan, setJabatan] = useState(initial?.jabatan ?? "");
   const [keterangan, setKeterangan] = useState(initial?.keterangan ?? "");
   const [urutan, setUrutan] = useState(initial?.urutan ?? 0);
+  const [tingkat, setTingkat] = useState(initial?.tingkat ?? 1);
   const [foto, setFoto] = useState<File | null>(null);
 
   function handleSubmit(e: React.FormEvent) {
@@ -543,6 +537,7 @@ function AnggotaModal({
     form.set("jabatan", jabatan);
     form.set("keterangan", keterangan);
     form.set("urutan", String(urutan));
+    form.set("tingkat", String(tingkat));
     if (foto) form.set("foto", foto);
     onSubmit(form);
   }
@@ -584,7 +579,21 @@ function AnggotaModal({
             />
           </div>
           <div>
-            <label className="eyebrow text-ink/50">Urutan Tampil</label>
+            <label className="eyebrow text-ink/50">Posisi di Bagan (Tingkat)</label>
+            <select
+              value={tingkat}
+              onChange={(e) => setTingkat(Number(e.target.value))}
+              className="mt-2 w-full border border-ink/15 bg-white px-4 py-2.5 text-sm outline-none focus-visible:border-redd"
+            >
+              {tingkatOptions.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="eyebrow text-ink/50">Urutan Tampil (kiri → kanan dalam satu tingkat)</label>
             <input
               type="number"
               value={urutan}

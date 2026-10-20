@@ -5,14 +5,19 @@ import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
+function parseTingkat(value: FormDataEntryValue | null): number {
+  const n = Number(value || 1) || 1;
+  return Math.min(5, Math.max(1, Math.round(n)));
+}
+
 export async function GET() {
   try {
     await ensureSchema();
     const sql = db();
     const rows = await sql`
-      SELECT id, nama, jabatan, foto_url, keterangan, urutan, created_at
+      SELECT id, nama, jabatan, foto_url, keterangan, urutan, tingkat, created_at
       FROM anggota
-      ORDER BY urutan ASC, created_at ASC
+      ORDER BY tingkat ASC, urutan ASC, created_at ASC
     `;
     return NextResponse.json({ data: rows });
   } catch (err) {
@@ -35,6 +40,7 @@ export async function POST(req: Request) {
     const jabatan = String(form.get("jabatan") || "").trim();
     const keterangan = String(form.get("keterangan") || "").trim();
     const urutan = Number(form.get("urutan") || 0) || 0;
+    const tingkat = parseTingkat(form.get("tingkat"));
     const foto = form.get("foto");
 
     if (!nama || !jabatan) {
@@ -49,9 +55,9 @@ export async function POST(req: Request) {
 
     const sql = db();
     const rows = await sql`
-      INSERT INTO anggota (nama, jabatan, foto_url, keterangan, urutan)
-      VALUES (${nama}, ${jabatan}, ${fotoUrl}, ${keterangan}, ${urutan})
-      RETURNING id, nama, jabatan, foto_url, keterangan, urutan, created_at
+      INSERT INTO anggota (nama, jabatan, foto_url, keterangan, urutan, tingkat)
+      VALUES (${nama}, ${jabatan}, ${fotoUrl}, ${keterangan}, ${urutan}, ${tingkat})
+      RETURNING id, nama, jabatan, foto_url, keterangan, urutan, tingkat, created_at
     `;
     return NextResponse.json({ data: rows[0] }, { status: 201 });
   } catch (err) {

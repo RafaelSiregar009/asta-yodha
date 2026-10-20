@@ -46,3 +46,101 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ───────────── Bagan struktur organisasi (pohon) ───────────── */
+@layer components {
+  .org-scroll {
+    overflow-x: auto;
+    padding-bottom: 1rem;
+  }
+
+  .org-tree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  /* garis vertikal penghubung antar tingkat */
+  .org-link {
+    display: block;
+    width: 2px;
+    height: 1.5rem;
+    background: #0a0a0a;
+  }
+
+  .org-row {
+    display: flex;
+    justify-content: center;
+  }
+
+  .org-item {
+    position: relative;
+    padding: 1.5rem 0.5rem 0;
+  }
+
+  /* garis horizontal (bus) di atas kartu */
+  .org-item::before,
+  .org-item::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 0;
+    border-top: 2px solid #0a0a0a;
+  }
+  .org-item::before {
+    left: 0;
+  }
+  .org-item::after {
+    right: 0;
+  }
+  .org-item:first-child::before,
+  .org-item:last-child::after {
+    border-top-color: transparent;
+  }
+  .org-item:only-child::before,
+  .org-item:only-child::after {
+    display: none;
+  }
+
+  /* garis vertikal kecil dari bus ke kartu */
+  .org-stub {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 1.5rem;
+    margin-left: -1px;
+    background: #0a0a0a;
+  }
+
+  /* tingkat paling atas tidak punya garis ke atas */
+  .org-root .org-item {
+    padding-top: 0;
+  }
+  .org-root .org-item::before,
+  .org-root .org-item::after,
+  .org-root .org-stub {
+    display: none;
+  }
+
+  /* di layar kecil: kartu ditumpuk ke bawah, tersambung garis vertikal */
+  @media (max-width: 767px) {
+    .org-row {
+      flex-direction: column;
+      align-items: center;
+    }
+    .org-item::before,
+    .org-item::after {
+      display: none;
+    }
+    .org-root .org-item + .org-item {
+      padding-top: 1.5rem;
+    }
+    .org-root .org-item + .org-item .org-stub {
+      display: block;
+    }
+  }
+}

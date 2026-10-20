@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { unstable_noStore as noStore } from "next/cache";
 import { db, ensureSchema } from "@/lib/db";
 import type { Anggota } from "@/lib/data";
 
@@ -9,31 +8,19 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-export const fetchCache = "force-no-store";
 
 async function getAnggota(): Promise<{ data: Anggota[]; error: string | null }> {
-  // Memastikan hasil query Neon tidak disimpan sebagai cache halaman.
-  noStore();
-
   try {
     await ensureSchema();
     const sql = db();
-
     const rows = await sql`
-      SELECT id, nama, jabatan, foto_url, keterangan, urutan, created_at
+      SELECT id, nama, jabatan, foto_url, keterangan, urutan, tingkat, created_at
       FROM anggota
-      ORDER BY urutan ASC, created_at ASC
+      ORDER BY tingkat ASC, urutan ASC, created_at ASC
     `;
-
-    return {
-      data: rows as unknown as Anggota[],
-      error: null,
-    };
+    return { data: rows as unknown as Anggota[], error: null };
   } catch (err) {
-    return {
-      data: [],
-      error: err instanceof Error ? err.message : "Gagal memuat data pengurus.",
-    };
+    return { data: [], error: err instanceof Error ? err.message : "Gagal memuat data." };
   }
 }
 
@@ -42,12 +29,48 @@ function initials(name: string): string {
     .split(" ")
     .filter(Boolean)
     .slice(0, 2)
-    .map((word) => word[0]?.toUpperCase())
+    .map((w) => w[0]?.toUpperCase())
     .join("");
+}
+
+function groupByTingkat(list: Anggota[]): Anggota[][] {
+  const map = new Map<number, Anggota[]>();
+  for (const person of list) {
+    const key = person.tingkat ?? 1;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key)!.push(person);
+  }
+  return Array.from(map.entries())
+    .sort((a, b) => a[0] - b[0])
+    .map(([, people]) => people);
+}
+
+function PersonCard({ person }: { person: Anggota }) {
+  return (
+    <div className="group relative aspect-[3/4] w-44 overflow-hidden bg-ink shadow-[5px_5px_0_0_rgba(10,10,10,0.18)]">
+      {person.foto_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={person.foto_url}
+          alt={person.nama}
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center font-display text-5xl text-cream/15">
+          {initials(person.nama)}
+        </div>
+      )}
+      <div className="absolute inset-x-0 bottom-0 border-t-2 border-redd bg-gradient-to-t from-ink via-ink/85 to-ink/20 p-3 pt-8">
+        <p className="text-sm font-semibold leading-tight text-cream">{person.nama}</p>
+        <p className="mt-0.5 text-xs text-cream/65">{person.jabatan}</p>
+      </div>
+    </div>
+  );
 }
 
 export default async function PengurusPage() {
   const { data: pengurus, error } = await getAnggota();
+  const levels = groupByTingkat(pengurus);
 
   return (
     <div className="py-16 md:py-24">
@@ -84,36 +107,28 @@ export default async function PengurusPage() {
         </div>
       )}
 
-      {!error && pengurus.length > 0 && (
-        <div className="container-page mt-14 grid grid-cols-2 gap-px bg-ink/10 md:grid-cols-4">
-          {pengurus.map((person) => (
-            <article
-              key={person.id}
-              className="group relative aspect-[3/4] overflow-hidden bg-ink"
-            >
-              {person.foto_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={person.foto_url}
-                  alt={person.nama}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center font-display text-5xl text-cream/15">
-                  {initials(person.nama)}
+      {levels.length > 0 && (
+        <div className="container-page mt-14">
+          <div className="org-scroll">
+            <div className="org-tree">
+              {levels.map((people, idx) => (
+                <div key={idx} className="flex flex-col items-center">
+                  {idx > 0 && <span className="org-link" aria-hidden="true" />}
+                  <div
+                    className={`org-row ${idx === 0 ? "org-root" : ""}`}
+                    role="list"
+                  >
+                    {people.map((person) => (
+                      <div key={person.id} className="org-item" role="listitem">
+                        <span className="org-stub" aria-hidden="true" />
+                        <PersonCard person={person} />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              )}
-
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink via-ink/70 to-transparent p-4 pt-10">
-                <p className="font-semibold text-cream">{person.nama}</p>
-                <p className="text-sm text-cream/60">{person.jabatan}</p>
-
-                {person.keterangan && (
-                  <p className="mt-1 text-xs text-cream/50">{person.keterangan}</p>
-                )}
-              </div>
-            </article>
-          ))}
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>

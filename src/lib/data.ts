@@ -33,15 +33,14 @@ export type Anggota = {
   foto_url: string | null;
   keterangan: string;
   urutan: number;
+  tingkat: number;
   created_at: string;
 };
 
-export type Berita = {
-  id: number;
-  judul: string;
-  ringkasan: string;
-  isi: string;
-  foto_url: string | null;
-  created_at: string;
-  updated_at: string;
-};
+export const tingkatOptions: { value: number; label: string }[] = [
+  { value: 1, label: "Tingkat 1 — Pimpinan (Ketua)" },
+  { value: 2, label: "Tingkat 2 — Wakil Ketua" },
+  { value: 3, label: "Tingkat 3 — Sekretaris & Bendahara" },
+  { value: 4, label: "Tingkat 4 — Seksi / Bidang" },
+  { value: 5, label: "Tingkat 5 — Anggota" },
+];

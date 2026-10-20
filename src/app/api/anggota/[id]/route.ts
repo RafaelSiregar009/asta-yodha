@@ -5,6 +5,11 @@ import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
+function parseTingkat(value: FormDataEntryValue | null): number {
+  const n = Number(value || 1) || 1;
+  return Math.min(5, Math.max(1, Math.round(n)));
+}
+
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   if (!(await requireAdmin(req))) {
     return NextResponse.json({ error: "Tidak diizinkan." }, { status: 401 });
@@ -22,6 +27,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     const jabatan = String(form.get("jabatan") || "").trim();
     const keterangan = String(form.get("keterangan") || "").trim();
     const urutan = Number(form.get("urutan") || 0) || 0;
+    const tingkat = parseTingkat(form.get("tingkat"));
     const foto = form.get("foto");
 
     if (!nama || !jabatan) {
@@ -42,15 +48,16 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       ? await sql`
           UPDATE anggota
           SET nama = ${nama}, jabatan = ${jabatan}, keterangan = ${keterangan},
-              urutan = ${urutan}, foto_url = ${fotoUrl}
+              urutan = ${urutan}, tingkat = ${tingkat}, foto_url = ${fotoUrl}
           WHERE id = ${id}
-          RETURNING id, nama, jabatan, foto_url, keterangan, urutan, created_at
+          RETURNING id, nama, jabatan, foto_url, keterangan, urutan, tingkat, created_at
         `
       : await sql`
           UPDATE anggota
-          SET nama = ${nama}, jabatan = ${jabatan}, keterangan = ${keterangan}, urutan = ${urutan}
+          SET nama = ${nama}, jabatan = ${jabatan}, keterangan = ${keterangan},
+              urutan = ${urutan}, tingkat = ${tingkat}
           WHERE id = ${id}
-          RETURNING id, nama, jabatan, foto_url, keterangan, urutan, created_at
+          RETURNING id, nama, jabatan, foto_url, keterangan, urutan, tingkat, created_at
         `;
 
     if (rows.length === 0) {

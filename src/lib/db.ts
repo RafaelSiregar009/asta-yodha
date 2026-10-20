@@ -16,7 +16,10 @@ function getConnectionString(): string {
 }
 
 export function db() {
-  return neon(getConnectionString());
+  // cache: "no-store" memastikan hasil query selalu fresh (tidak di-cache Next.js)
+  return neon(getConnectionString(), {
+    fetchOptions: { cache: "no-store" },
+  });
 }
 
 let schemaReady: Promise<void> | null = null;
@@ -54,16 +57,10 @@ export async function ensureSchema(): Promise<void> {
           created_at TIMESTAMPTZ NOT NULL DEFAULT now()
         )
       `;
+      // Kolom tingkat = posisi di bagan pohon (1 = paling atas)
       await sql`
-        CREATE TABLE IF NOT EXISTS berita (
-          id SERIAL PRIMARY KEY,
-          judul TEXT NOT NULL,
-          ringkasan TEXT NOT NULL DEFAULT '',
-          isi TEXT NOT NULL DEFAULT '',
-          foto_url TEXT,
-          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-        )
+        ALTER TABLE anggota
+        ADD COLUMN IF NOT EXISTS tingkat INTEGER NOT NULL DEFAULT 1
       `;
     })();
   }
