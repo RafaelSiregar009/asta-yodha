@@ -65,7 +65,8 @@ function PersonCard({ person }: { person: Anggota }) {
           {initials(person.nama)}
         </div>
       )}
-      <div className="absolute inset-x-0 bottom-0 border-t-2 border-redd bg-gradient-to-t from-ink via-ink/85 to-ink/20 p-3 pt-8">
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink via-ink/85 to-transparent p-3 pt-10">
+        <span className="mb-2 block h-0.5 w-8 bg-redd" aria-hidden="true" />
         <p className="text-sm font-semibold leading-tight text-cream">{person.nama}</p>
         <p className="mt-0.5 text-xs text-cream/65">{person.jabatan}</p>
       </div>
